@@ -26,14 +26,14 @@ classdef ML_C < handle
     function [x] = Feature_Normalize(x,mu,sigma)
       % This function normalizes all the features of x using an input mean and standard deviation
       temp = bsxfun(@minus,x,mu);
-      x = bsxfun(@rdivide,temp,sigma);
+      x = (x - mu)./sigma;
+    
     end
     
     function [x] = Feature_De_Normalize(x,mu,sigma)
         % This function removes the normalization applied to x using an
         % input mu and sigma
-        temp = bsxfun(@times,x,sigma);
-        x = bsxfun(@plus,temp,mu);
+        x = (x.*sigma)+mu;
     end
     
   end
@@ -141,8 +141,12 @@ classdef ML_C < handle
 
     end
     
-    function y = Predict(obj,x_in)
-        
+    function y = Predict(obj,debugplot,x_in)
+        % This function predicts the output for an input using the learned values
+        if nargin < 2, debugplot = 0; end
+        if nargin < 3, x_in = obj.Get_x(); end
+      
+
       % First feature normalize using stored values
       x = ML_C.Feature_Normalize(x_in,obj.mu,obj.sigma);
       
@@ -151,6 +155,18 @@ classdef ML_C < handle
       
       % Get y
       y = x*obj.theta;
+      
+      % Plot
+      if debugplot
+          plot(obj.Get_x(),obj.y,'*'); % Plot the training data
+          hold all;
+          plot(x_in,y); % Plot the prediction
+          grid on;
+          xlabel('x');
+          ylabel('y');
+          legend('Training Data','Prediction');
+          hold off;
+      end
       
     end
     
