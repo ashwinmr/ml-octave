@@ -1,0 +1,127 @@
+classdef ML_C < handle
+
+  properties
+    
+    x; % input training set (always has bias unit)
+    y; % result of training set
+    theta; % parameters for machine learning
+    mu = 0; % mean of x
+    sigma = 1; % sigma of x
+    J_history; % history of J
+    
+  end
+  
+  methods(Static)
+  
+    function x = Add_Bias(x)
+      % This function adds the bias unit to an input training set
+      x = [ones(size(x,1),1),x];
+    end
+    
+    function [x] = Feature_Normalize(x,mu,sigma)
+      % This function normalizes all the features of x using an input mean and standard deviation
+      x = (x - mu)./sigma;
+    
+    end
+    
+  end
+  
+  methods
+  
+    function set.x(obj,x)
+      % This function sets the value of x after feature normalization and biasing
+      
+      % Get the normalization values
+      obj.mu = mean(x);
+      obj.sigma = std(x);
+      
+      % Feature normalize x using these values
+      x = ML_C.Feature_Normalize(x,obj.mu,obj.sigma);
+      
+      % Add bias unit to x and store
+      obj.x = ML_C.Add_Bias(x)
+      
+      % Initialize theta
+      obj.theta = zeros(size(obj.x,2),1);
+
+    end
+    
+    function J = Compute_Cost(obj)
+      % This function computes the cost function for x, y and theta.
+      % The cost function used is for linear regression
+      % x is the training examples (rows) having features (cols) and a bias unit
+      % y is the training result
+      % theta is the coefficients used as a linear function of x (including bias unit)
+      
+      % local values
+      m = length(obj.x);
+      
+      % Calculate cost function
+      J = (obj.x*obj.theta-obj.y)'*(obj.x*obj.theta-obj.y)/2/m;
+  
+    end
+    
+    function Gradient_Descent(obj,alpha,num_iters,debugplot)
+      % This function performs gradient descent on theta for a given x, y and number of iterations
+      
+      if nargin < 4, debugplot = 0; end
+      
+      % Store useful values
+      m = length(obj.x);
+      
+      % Initialize
+      obj.J_history = zeros(num_iters,1);
+      
+      for i = 1:num_iters
+        
+        % Find the gradient
+        gradient = obj.x'*(obj.x*obj.theta-obj.y)/m;
+        
+        % Take a gradient step
+        obj.theta = obj.theta - alpha*gradient;
+        
+        % Store the cost in history
+        obj.J_history(i) = obj.Compute_Cost();
+        
+      end
+      
+      % Plotting
+      if debugplot
+        
+        plot(obj.J_history);
+        xlabel('Iteration');
+        ylabel('Cost');
+        grid on;
+        title('Gradient Descent');
+        
+      end
+      
+    end
+    
+    function Normal_Equation(obj)
+      % This function obtains the optimal theta for linear regression without gradient descent
+      % Note that the theta calculated using the normal equation will be different from
+      % the one you get using gradient descent since the normal equation does not use
+      % feature normalization
+      
+      obj.theta = (obj.x'*obj.x)^-1*obj.x'*obj.y;
+
+    end
+    
+    function y = Predict(obj,x)
+      % This function predicts the output for an input using the learned values
+      
+      % First feature normalize using stored values
+      x = ML_C.Feature_Normalize(x,obj.mu,obj.sigma);
+      
+      % ADd the bias unit
+      x = ML_C.Add_Bias(x);
+      
+      % Get y
+      y = x*obj.theta;
+      
+    end
+    
+  end
+  
+end
