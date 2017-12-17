@@ -36,7 +36,7 @@ classdef ML_C < handle
         x = bsxfun(@plus,temp,mu);
     end
     
-    function g = sigmoid(z)
+    function g = Sigmoid(z)
       % This function runs the sigmoid function on every element in a matrix
 
       g = 1./(1+exp(-z));
@@ -86,7 +86,7 @@ classdef ML_C < handle
         x = ML_C.Feature_De_Normalize(x,obj.mu,obj.sigma);
     end
     
-    function [J, gradient] = Compute_Cost(obj)
+    function [J, gradient] = Compute_Cost_Linear(obj)
       % This function computes the cost function for x, y and theta.
       % The cost function used is for linear regression
       % x is the training examples (rows) having features (cols) and a bias unit
@@ -106,23 +106,20 @@ classdef ML_C < handle
   
     end
     
-    function [J, gradient] = Compute_Cost_Logistic(obj,lambda)
+    function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta)
       % This function computes the cost function for logistic regression
+      if nargin < 3, theta = obj.theta; end
 
       % Store values
       m = length(obj.y); % number of training examples
-
-      % You need to return the following variables correctly 
-      J = 0;
-      grad = zeros(size(theta));
       
-      h = sigmoid(obj.x*obj.theta);
+      h = Sigmoid(obj.x*theta);
       
       % Compute cost
-      J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (obj.theta(2:end)'*obj.theta(2:end))*lambda/2/m;
+      J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
       
       % Compute gradient
-      gradient = (obj.x'*(h-obj.y))/m + [0;obj.theta(2:end)*lambda/m];
+      gradient = (obj.x'*(h-obj.y))/m + [0;theta(2:end)*lambda/m];
       
     end
     
@@ -139,7 +136,7 @@ classdef ML_C < handle
       
       for i = 1:num_iters
         
-        [obj.J_history(i),gradient] = obj.Compute_Cost();
+        [obj.J_history(i),gradient] = obj.Compute_Cost_Linear();
         
         % Take a gradient step
         obj.theta = obj.theta - alpha*gradient;
@@ -159,6 +156,25 @@ classdef ML_C < handle
       
     end
     
+    function Optimize_Logistic(obj,lambda,max_iter)
+        % This function finds the optimal theta for a training set using fminunc
+        
+        if nargin < 3; max_iter = 500; end
+            
+        % Set values
+        theta = obj.theta;
+            
+        % Set options
+        options = optimset('GradObj', 'on', 'MaxIter', max_iter);
+        
+        % Optimize
+        func = @(theta)(obj.Compute_Cost_Logistic(obj,lambda,theta));
+        [theta, J, exit_flag] = fminunc(func,theta,options);
+        
+        obj.theta = theta;
+        
+    end
+
     function Normal_Equation(obj)
       % This function obtains the optimal theta for linear regression without gradient descent
       % Note that the theta calculated using the normal equation will be different from
@@ -169,7 +185,7 @@ classdef ML_C < handle
 
     end
     
-    function y = Predict(obj,x_in)
+    function y = Predict_Linear(obj,x_in)
         
       % First feature normalize using stored values
       x = ML_C.Feature_Normalize(x_in,obj.mu,obj.sigma);
@@ -179,6 +195,19 @@ classdef ML_C < handle
       
       % Get y
       y = x*obj.theta;
+      
+    end
+    
+    function y = Predict_Logistic(obj,x_in)
+        
+      % First feature normalize using stored values
+      x = ML_C.Feature_Normalize(x_in,obj.mu,obj.sigma);
+      
+      % Add the bias unit
+      x = ML_C.Add_Bias(x);
+      
+      % Get y
+      y = ML_C.Sigmoid(x*obj.theta);
       
     end
     

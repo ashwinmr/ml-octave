@@ -25,7 +25,7 @@ n = 1500;
 ml.Gradient_Descent(1,alpha,n);
 
 % Predict
-y_predicted = ml.Predict(x);
+y_predicted = ml.Predict_Linear(x);
 
 % Plot
 plot(p,v,'*'); % Plot the training data
