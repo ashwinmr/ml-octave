@@ -101,6 +101,26 @@ classdef ML_C < handle
   
     end
     
+    function [J, grad] = Compute_Cost_Logistic(obj,lambda)
+      % This function computes the cost function for logistic regression
+
+      % Store values
+      m = length(obj.y); % number of training examples
+
+      % You need to return the following variables correctly 
+      J = 0;
+      grad = zeros(size(theta));
+      
+      h = sigmoid(obj.x*obj.theta);
+      
+      % Compute cost
+      J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (obj.theta(2:end)'*obj.theta(2:end))*lambda/2/m;
+      
+      % Compute gradient
+      grad = (obj.x'*(h-obj.y))/m + [0;obj.theta(2:end)*lambda/m];
+      
+    end
+    
     function Gradient_Descent(obj,debugplot,alpha,num_iters)
       % This function performs gradient descent on theta for a given x, y and number of iterations
       
