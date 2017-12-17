@@ -23,7 +23,7 @@ ml.Set_y(v);
 alpha = 0.1;
 n = 1500;
 lambda = 0;
-ml.Gradient_Descent(1,alpha,n,lambda);
+ml.Optimize_Linear(lambda,n);
 
 % Predict
 y_predicted = ml.Predict_Linear(x);

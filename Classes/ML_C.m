@@ -88,10 +88,7 @@ classdef ML_C < handle
     
     function [J, gradient] = Compute_Cost_Linear(obj,lambda,theta)
       % This function computes the cost function for x, y and theta.
-      % The cost function used is for linear regression
-      % x is the training examples (rows) having features (cols) and a bias unit
-      % y is the training result
-      % theta is the coefficients used as a linear function of x (including bias unit)
+      % It allows regularization
       if nargin < 2, lambda = 0; end
       if nargin < 3, theta = obj.theta; end
           
@@ -110,13 +107,14 @@ classdef ML_C < handle
     
     function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta)
       % This function computes the cost function for logistic regression
+      % It allows regularization
       if nargin < 2, lambda = 0; end
       if nargin < 3, theta = obj.theta; end
 
       % Store values
       m = length(obj.y); % number of training examples
       
-      h = Sigmoid(obj.x*theta);
+      h = ML_C.Sigmoid(obj.x*theta);
       
       % Compute cost
       J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
@@ -221,7 +219,9 @@ classdef ML_C < handle
       
     end
     
-    function y = Predict_Logistic(obj,x_in)
+    function y = Predict_Logistic(obj,x_in,threshold)
+        % Function to predict the result of logistic regression
+        if nargin < 3, threshold = 0.5; end
         
       % First feature normalize using stored values
       x = ML_C.Feature_Normalize(x_in,obj.mu,obj.sigma);
@@ -230,7 +230,7 @@ classdef ML_C < handle
       x = ML_C.Add_Bias(x);
       
       % Get y
-      y = ML_C.Sigmoid(x*obj.theta);
+      y = ML_C.Sigmoid(x*obj.theta) >= threshold;
       
     end
     

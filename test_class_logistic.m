@@ -1,39 +1,49 @@
 % Testing all functions in the class
 
 clc;
-clear;
-close;
+clear all;
+close all;
 
 addpath('Functions');
 addpath('Classes');
 
 % Load training data
-load('p');
-load('v');
+load('x_log');
+load('y_log');
 
 % Create an object of ML class
 ml = ML_C();
 
 % Set the x and y for the class
-x = [p,p.^2,p.^3];
 ml.Set_x(x);
-ml.Set_y(v);
+ml.Set_y(y);
 
-% Perform gradient descent
-alpha = 0.1;
-n = 1500;
+% Perform logistic regression
 lambda = 0;
-ml.Optimize_Linear(lambda,n);
+n = 500;
+ml.Optimize_Logistic(lambda,n);
 
 % Predict
-y_predicted = ml.Predict_Linear(x);
+y_predicted = ml.Predict_Logistic(x);
 
-% Plot
-plot(p,v,'*'); % Plot the training data
+% Plotting
+
+% Only need 2 points to define a line, so choose two endpoints
+plot_x = [min(x(:,1)),  max(x(:,1))];
+plot_x_n = ML_C.Feature_Normalize(plot_x,ml.mu,ml.sigma);
+% Calculate the decision boundary line
+plot_y_n = (-1./ml.theta(3)).*(ml.theta(2).*plot_x_n + ml.theta(1));
+plot_y = ML_C.Feature_De_Normalize(plot_y_n,ml.mu,ml.sigma);
+
+% Find indices of positive and negative examples
+pos = find(y==1); 
+neg = find(y==0);
+plot(x(pos,1),x(pos,2),'k+','LineWidth',2,'MarkerSize',7);
 hold all;
-plot(x(:,1),y_predicted); % Plot the prediction
+plot(x(neg,1),x(neg,2),'ko','MarkerFaceColor','y','MarkerSize',7);
+plot(plot_x,plot_y);
 grid on;
-xlabel('x');
-ylabel('y');
-legend('Training Data','Prediction');
+xlabel('x1');
+ylabel('x2');
+legend('Positive','Negative','boundary');
 hold off;
