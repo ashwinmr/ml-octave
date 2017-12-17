@@ -86,7 +86,7 @@ classdef ML_C < handle
         x = ML_C.Feature_De_Normalize(x,obj.mu,obj.sigma);
     end
     
-    function J = Compute_Cost(obj)
+    function [J, gradient] = Compute_Cost(obj)
       % This function computes the cost function for x, y and theta.
       % The cost function used is for linear regression
       % x is the training examples (rows) having features (cols) and a bias unit
@@ -98,10 +98,15 @@ classdef ML_C < handle
       
       % Calculate cost function
       J = (obj.x*obj.theta-obj.y)'*(obj.x*obj.theta-obj.y)/2/m;
+      
+      h = obj.x*obj.theta;
+      
+      % Compute gradient
+      gradient = obj.x'*(h-obj.y)/m;
   
     end
     
-    function [J, grad] = Compute_Cost_Logistic(obj,lambda)
+    function [J, gradient] = Compute_Cost_Logistic(obj,lambda)
       % This function computes the cost function for logistic regression
 
       % Store values
@@ -117,7 +122,7 @@ classdef ML_C < handle
       J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (obj.theta(2:end)'*obj.theta(2:end))*lambda/2/m;
       
       % Compute gradient
-      grad = (obj.x'*(h-obj.y))/m + [0;obj.theta(2:end)*lambda/m];
+      gradient = (obj.x'*(h-obj.y))/m + [0;obj.theta(2:end)*lambda/m];
       
     end
     
@@ -127,21 +132,17 @@ classdef ML_C < handle
       if nargin < 2, debugplot = 0; end
       
       % Store useful values
-      m = length(obj.x);
+      m = length(obj.y);
       
       % Initialize
       obj.J_history = zeros(num_iters,1);
       
       for i = 1:num_iters
         
-        % Find the gradient
-        gradient = obj.x'*(obj.x*obj.theta-obj.y)/m;
+        [obj.J_history(i),gradient] = obj.Compute_Cost();
         
         % Take a gradient step
         obj.theta = obj.theta - alpha*gradient;
-        
-        % Store the cost in history
-        obj.J_history(i) = obj.Compute_Cost();
         
       end
       
