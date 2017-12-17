@@ -36,6 +36,13 @@ classdef ML_C < handle
         x = bsxfun(@plus,temp,mu);
     end
     
+    function g = sigmoid(z)
+      % This function runs the sigmoid function on every element in a matrix
+
+      g = 1./(1+exp(-z));
+
+    end
+    
   end
   
   methods
