@@ -3,9 +3,9 @@ classdef ML_C < handle
   properties
     
     x; % Stored training set with bias and normalization
-    y; % result of training set
+    y; % result of training set (can have multiple columns)
     m; % Number of examples in the training set
-    theta; % parameters for machine learning
+    theta; % parameters for machine learning (if multiple, columns are theta for each class)
     mu = 0; % mean of x
     sigma = 1; % sigma of x
     J_history; % history of J
@@ -97,10 +97,10 @@ classdef ML_C < handle
       if nargin < 3, theta = obj.theta; end
           
       % local values
-      m = length(obj.y);
+      m = obj.m;
       
       % Calculate cost function
-      J = (obj.x*theta-obj.y)'*(obj.x*theta-obj.y)/2/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
+      J = sum((obj.x*theta-obj.y).^2)/2/m + sum(theta(2:end,:).^2)*lambda/2/m;
       
       h = obj.x*theta;
       
@@ -116,7 +116,7 @@ classdef ML_C < handle
       if nargin < 3, theta = obj.theta; end
 
       % Store values
-      m = length(obj.y); % number of training examples
+      m = obj.m;
       
       h = ML_C.Sigmoid(obj.x*theta);
       
