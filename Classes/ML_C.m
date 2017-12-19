@@ -4,6 +4,7 @@ classdef ML_C < handle
     
     x; % Stored training set with bias and normalization
     y; % result of training set
+    m; % Number of examples in the training set
     theta; % parameters for machine learning
     mu = 0; % mean of x
     sigma = 1; % sigma of x
@@ -51,6 +52,9 @@ classdef ML_C < handle
     
     function Set_x(obj,x)
       % This function sets the value of x after feature normalization and biasing
+      
+      % Store m
+      obj.m = size(x,1);
       
       % Get the normalization values
       obj.mu = mean(x);
