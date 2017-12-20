@@ -123,6 +123,7 @@ classdef ML_C < handle
       k = theta(2);
       b = theta(3);
       p = obj.x;
+      p(p<0.1) = 0.1; % prevent zero for division
       v = (1-c./(p + c)).*(k.*(p+c)+b);
       h = v;
       
@@ -132,17 +133,11 @@ classdef ML_C < handle
       % Calculate cost function
       J = (h-obj.y)'*(h-obj.y)/2/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
       
-      % Compute gradient
-      for i = 1:m
-        
-        gradient(1,1) = (-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(2*k*(-c/(c + p(i)) + 1) + 2*(b + k*(c + p(i)))*(c/(c + p(i))^2 - 1/(c + p(i))));
-        gradient(2,1) = 2*(c + p(i))*(-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(-c/(c + p(i)) + 1);
-        gradient(3,1) = (-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(-2*c/(c + p(i)) + 2);
-      end
+      % Compute gradients
+      gradient(1,1) = sum((h-obj.y).*(k*(1-c./(p+c))+ (k*(p+c)+b).*(2*c-p)./((p+c).^2)))/m;
+      gradient(2,1) = sum((h-obj.y).*p)/m;
+      gradient(3,1) = sum((h-obj.y).*(1-c./(p+c)))/m;
       
-      %gradient = obj.x'*(h-obj.y)/m;
-      %gradient = gradient*ones(3,1);
-  
     end
     
     function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta)

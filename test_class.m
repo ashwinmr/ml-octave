@@ -22,10 +22,11 @@ ml.Set_y(v);
 % Set theta
 
 % Perform gradient descent
-alpha = 0.01;
-n = 10;
+alpha = 0.0001;
+n = 100;
 lambda = 0;
-ml.Gradient_Descent_Custom(1,alpha,n,lambda);
+%ml.Gradient_Descent_Custom(1,alpha,n,lambda);
+ml.Optimize_Custom(lambda,n);
 
 % Predict
 C = ml.theta(1);
@@ -36,7 +37,7 @@ V = (1-C./(P + C)).*(K.*(P+C)+B);
 y_predicted = V;
 
 % Plot
-%{
+%
 plot(p,v,'*'); % Plot the training data
 hold all;
 plot(p(:,1),y_predicted); % Plot the prediction
