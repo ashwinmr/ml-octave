@@ -105,6 +105,42 @@ classdef ML_C < handle
   
     end
     
+    function [J, gradient] = Compute_Cost_Custom(obj,lambda,theta)
+      % This function computes the cost function for x, y and theta.
+      % It allows regularization
+      if nargin < 2, lambda = 0; end
+      if nargin < 3, theta = obj.theta; end
+          
+      % local values
+      m = length(obj.y);
+      
+      % Compute h of x
+      c = theta(1);
+      k = theta(2);
+      b = theta(3);
+      p = obj.x;
+      v = (1-c./(p + c)).*(k.*(p+c)+b);
+      h = v;
+      
+      % Remove NaNs
+      h(isnan(h)) = 0;
+      
+      % Calculate cost function
+      J = (h-obj.y)'*(h-obj.y)/2/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
+      
+      % Compute gradient
+      for i = 1:m
+        
+        gradient(1,1) = (-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(2*k*(-c/(c + p(i)) + 1) + 2*(b + k*(c + p(i)))*(c/(c + p(i))^2 - 1/(c + p(i))));
+        gradient(2,1) = 2*(c + p(i))*(-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(-c/(c + p(i)) + 1);
+        gradient(3,1) = (-v(i) + (b + k*(c + p(i)))*(-c/(c + p(i)) + 1))*(-2*c/(c + p(i)) + 2);
+      end
+      
+      %gradient = obj.x'*(h-obj.y)/m;
+      %gradient = gradient*ones(3,1);
+  
+    end
+    
     function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta)
       % This function computes the cost function for logistic regression
       % It allows regularization
@@ -128,7 +164,7 @@ classdef ML_C < handle
       % This function performs gradient descent on theta for a given x, y and number of iterations
       
       if nargin < 2, debugplot = 0; end
-      if naring < 5, lambda = 0; end
+      if nargin < 5, lambda = 0; end
       
       % Store useful values
       m = length(obj.y);
@@ -139,6 +175,40 @@ classdef ML_C < handle
       for i = 1:num_iters
         
         [obj.J_history(i),gradient] = obj.Compute_Cost_Linear(lambda);
+        
+        % Take a gradient step
+        obj.theta = obj.theta - alpha*gradient;
+        
+      end
+      
+      % Plotting
+      if debugplot
+        
+        plot(obj.J_history);
+        xlabel('Iteration');
+        ylabel('Cost');
+        grid on;
+        title('Gradient Descent');
+        
+      end
+      
+    end
+    
+    function Gradient_Descent_Custom(obj,debugplot,alpha,num_iters,lambda)
+      % This function performs gradient descent on theta for a given x, y and number of iterations
+      
+      if nargin < 2, debugplot = 0; end
+      if nargin < 5, lambda = 0; end
+      
+      % Store useful values
+      m = length(obj.y);
+      
+      % Initialize
+      obj.J_history = zeros(num_iters,1);
+      
+      for i = 1:num_iters
+        
+        [obj.J_history(i),gradient] = obj.Compute_Cost_Custom(lambda);
         
         % Take a gradient step
         obj.theta = obj.theta - alpha*gradient;
@@ -190,6 +260,25 @@ classdef ML_C < handle
         
         % Optimize
         func = @(t)(obj.Compute_Cost_Linear(lambda,t));
+        [theta, J, exit_flag] = fminunc(func,theta,options);
+        
+        obj.theta = theta;
+        
+    end
+    
+    function Optimize_Custom(obj,lambda,max_iter)
+        % This function finds the optimal theta for a training set using fminunc
+        if nargin < 2; lambda = 0; end
+        if nargin < 3; max_iter = 500; end
+            
+        % Set values
+        theta = obj.theta;
+            
+        % Set options
+        options = optimset('GradObj', 'on', 'MaxIter', max_iter);
+        
+        % Optimize
+        func = @(t)(obj.Compute_Cost_Custom(lambda,t));
         [theta, J, exit_flag] = fminunc(func,theta,options);
         
         obj.theta = theta;
