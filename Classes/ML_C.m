@@ -5,6 +5,7 @@ classdef ML_C < handle
     x; % Stored training set with bias and normalization
     y; % result of training set (can have multiple columns)
     m; % Number of examples in the training set
+    c; % Number of classes of outputs
     theta; % parameters for machine learning (if multiple, columns are theta for each class)
     mu = 0; % mean of x
     sigma = 1; % sigma of x
@@ -68,15 +69,18 @@ classdef ML_C < handle
       
       % Store x
       obj.x = x;
-      
-      % Initialize theta
-      obj.theta = zeros(size(obj.x,2),1);
 
     end
     
     function Set_y(obj,y)
         % This function sets the value of y
         obj.y = y;
+        
+        % Store c
+        obj.c = size(y,2);
+        
+        % Initialize theta
+        obj.theta = zeros(size(obj.x,2),obj.c);
     end
     
     function x = Get_x(obj)
@@ -99,21 +103,22 @@ classdef ML_C < handle
       % local values
       m = obj.m;
       
-      % Calculate cost function
-      J = sum((obj.x*theta-obj.y).^2)/2/m + sum(theta(2:end,:).^2)*lambda/2/m;
-      
       h = obj.x*theta;
       
+      % Calculate cost function
+      J = sum((h-obj.y).^2)/2/m + sum(theta(2:end,:).^2)*lambda/2/m;
+      
       % Compute gradient
-      gradient = obj.x'*(h-obj.y)/m;
+      gradient = obj.x'*(h-obj.y)/m + [zeros(1,size(theta,2));theta(2:end,:)*lambda/m];
   
     end
     
-    function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta)
+    function [J, gradient] = Compute_Cost_Logistic(obj,lambda,theta,y)
       % This function computes the cost function for logistic regression
       % It allows regularization
       if nargin < 2, lambda = 0; end
       if nargin < 3, theta = obj.theta; end
+      if nargin < 4, y = obj.y; end
 
       % Store values
       m = obj.m;
@@ -121,10 +126,10 @@ classdef ML_C < handle
       h = ML_C.Sigmoid(obj.x*theta);
       
       % Compute cost
-      J = (-obj.y'*log(h)-(1-obj.y)'*log(1-h))/m + (theta(2:end)'*theta(2:end))*lambda/2/m;
+      J = sum(-y.*log(h)-(1-y).*log(1-h))/m + sum(theta(2:end,:).^2)*lambda/2/m;
       
       % Compute gradient
-      gradient = (obj.x'*(h-obj.y))/m + [0;theta(2:end)*lambda/m];
+      gradient = (obj.x'*(h-y))/m + [zeros(1,size(theta,2));theta(2:end,:)*lambda/m];
       
     end
     
@@ -169,16 +174,19 @@ classdef ML_C < handle
             
         % Set values
         theta = obj.theta;
+        c = obj.c; % Number of classes
+        y = obj.y;
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
         
-        % Optimize
-        func = @(t)(obj.Compute_Cost_Logistic(lambda,t));
-        [theta, J, exit_flag] = fminunc(func,theta,options);
-        
+        % Optimize for each class
+        for i = 1:c
+          func = @(t)(obj.Compute_Cost_Logistic(lambda,t,y(:,i)));
+          [theta(:,i),J,exit_flag] = fminunc(func,theta(:,i),options);
+        end
+          
         obj.theta = theta;
-        
     end
     
     function Optimize_Linear(obj,lambda,max_iter)
