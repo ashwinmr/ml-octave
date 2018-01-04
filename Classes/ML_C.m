@@ -83,6 +83,8 @@ classdef ML_C < handle
         obj.theta = zeros(size(obj.x,2),obj.c);
     end
     
+    % Getters
+    
     function x = Get_x(obj)
         % This function gets the value of x be removing the bias and
         % normalization
