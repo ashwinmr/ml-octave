@@ -19,5 +19,23 @@ for i = 1:nl-1
     
     % Calculate values
     z = act*t';
-    
+    a{i+1} = Add_Bias(Sigmoid(z));
+end
+
+h = a{end};
+
+% Get cost function by adding up cost for every single element
+J = sum(sum(-log(h).*y-log(1-h).*(1-y)))/m;
+
+% Adding Regularization
+for i = 1:nl-1
+    J = J + lambda*(sum(sum(theta{i}(:,2:end).^2));
+end
+
+% Back propogation
+
+
+
+
+
 
