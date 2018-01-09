@@ -4,11 +4,32 @@ classdef nn_c < handle
     
     nl; % Number of layers
     xtr; % Training examples
-    ytr; 
+    ytr;
+    theta; % Cell array of matrices
     
   end
   
   methods
+  
+    function init_theta(obj,epsilon)
+        
+        if nargin < 2, epsilon = 0.12; end
+        
+        nl = obj.nl; % number of layers
+        nu = obj.nu; % array of number of units in each layer
+        
+        theta = cell(nl,1);
+        
+        for i = 1:nl-1
+            
+            theta{i} = rand(nu(i+1),nu(i) + 1)*2*epsilon - epsilon;
+            
+        end
+        
+        % Set the object property
+        obj.theta = theta;
+        
+    end
   
     function cost(obj,x,y,theta,lambda)
         
@@ -38,6 +59,7 @@ classdef nn_c < handle
         end
         
         % Back propogation
+        
         
     end
   
