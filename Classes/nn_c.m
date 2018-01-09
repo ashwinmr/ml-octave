@@ -31,10 +31,12 @@ classdef nn_c < handle
         
     end
   
-    function cost(obj,x,y,theta,lambda)
+    function [J,theta_grad] = cost(obj,x,y,theta,lambda)
         
         nl = obj.nl;
         a{1} = x; % First layer activation is the examples itself
+        theta_grad = cell(nl,1);
+        m =size(y,1); 
         
         % Forward propagation
         for i = 1:nl-1
@@ -59,7 +61,26 @@ classdef nn_c < handle
         end
         
         % Back propogation
+        delta = cell(nl,1);
         
+        delta{end} = a{end} - y;
+        
+        for i = nl-1:-1:2
+            t = theta{i};
+            
+            delta{i} = delta{i+1}*t(:,2:end).*Sigmoid_Gradient(z{i});
+            
+        end
+        
+        % Accumulate the gradients
+        % You cannot ignore the bias units when you are calculating the total contribution to error
+        for i = 1:nl-1
+            theta_grad{i} = delta{i}'*a{i}/m;
+            
+            % Add regularization (ignore bias column)
+            theta_grad{i}(:,2:end) = theta_grad(:,2:end) + theta{i}(:,2:end)*lambda/m;
+            
+        end
         
     end
   
