@@ -11,6 +11,35 @@ classdef nn_c < handle
   
   methods
   
+    function t = unroll_theta(obj,theta)
+        
+        nl = obj.nl; % number of layers
+        t = []; % Initialize t
+        
+        for i= 1:nl-1
+            t = [t;theta{i}(:)];
+        end
+        
+    end
+    
+    function theta = roll_theta(obj,t)
+        
+        nl = obj.nl; % number of layers
+        nu = obj.nu; % number of units in each layer
+        
+        theta = cell(nl,1);
+        count = 1;
+        
+        for i = 1:nl-1
+            r = nu(i+1); % number of rows
+            c = nu(i)+1; % number of columns
+            theta{i} = reshape(t(count:r*c),r,c);
+            count = count + r*c; % update the location of counter in the array
+        end
+        
+    end
+            
+  
     function init_theta(obj,epsilon)
         
         if nargin < 2, epsilon = 0.12; end
