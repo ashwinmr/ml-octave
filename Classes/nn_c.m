@@ -28,13 +28,13 @@ classdef nn_c < handle
         nl = obj.nl; % number of layers
         nu = obj.nu; % number of units in each layer
         
-        theta = cell(nl,1);
+        theta = cell(nl-1,1);
         count = 1;
         
         for i = 1:nl-1
             r = nu(i+1); % number of rows
             c = nu(i)+1; % number of columns
-            theta{i} = reshape(t(count:r*c),r,c);
+            theta{i} = reshape(t(count:count-1+r*c),r,c);
             count = count + r*c; % update the location of counter in the array
         end
         
@@ -62,24 +62,30 @@ classdef nn_c < handle
     end
   
     function [J,theta_grad] = cost(obj,x,y,theta,lambda)
-        
+    % Computes the cost and gradient
+    % The x input should not contain bias term
+        if nargin < 5, lambda = 0; end
+
         nl = obj.nl;
-        a{1} = x; % First layer activation is the examples itself
+        a = cell(nl,1); % Initialize activations
+        z = cell(nl,1); % Initialize z
+        delta = cell(nl,1); % Initialize delta
         theta_grad = cell(nl,1);
         m =size(y,1); 
+        
+        z{1} = x; % This is not actually used. z does not contain bias
+        a{1} = Add_Bias(x); % First layer activation is the examples itself. a has bias
         
         % Forward propagation
         for i = 1:nl-1
             
-            act = a{i}; % Activation for current layer
-            t = theta{i}; % Get the theta from current layer to next layer
-            
-            
-            z = act*t';
-            a{i+1} = Add_Bias(Sigmoid(z));
+            z{i+1} = a{i}*theta{i}';
+            a{i+1} = Add_Bias(Sigmoid(z{i+1}));
             
         end
         
+        % Remove bias from the output
+        a{end} = Remove_Bias(a{end}); % The output should not have bias
         h = a{end};
         
         % Get cost function by adding up cost for every single element
@@ -91,8 +97,6 @@ classdef nn_c < handle
         end
         
         % Back propogation
-        delta = cell(nl,1);
-        
         delta{end} = a{end} - y;
         
         for i = nl-1:-1:2
@@ -105,10 +109,10 @@ classdef nn_c < handle
         % Accumulate the gradients
         % You cannot ignore the bias units when you are calculating the total contribution to error
         for i = 1:nl-1
-            theta_grad{i} = delta{i}'*a{i}/m;
+            theta_grad{i} = delta{i+1}'*a{i}/m;
             
             % Add regularization (ignore bias column)
-            theta_grad{i}(:,2:end) = theta_grad(:,2:end) + theta{i}(:,2:end)*lambda/m;
+            theta_grad{i}(:,2:end) = theta_grad{i}(:,2:end) + theta{i}(:,2:end)*lambda/m;
             
         end
         
