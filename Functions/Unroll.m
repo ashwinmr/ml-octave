@@ -1,5 +1,5 @@
-function t = Unroll_Theta(theta)
-% Unroll a theta matrix or cell array of matrices into a single vector
+function t = Unroll(theta)
+% Unroll a matrix or cell array of matrices into a single vector
 
     t = []; % Initialize t
 

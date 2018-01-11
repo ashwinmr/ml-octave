@@ -30,13 +30,17 @@ load('ex4data1.mat');
 % Load the weights into variables Theta1 and Theta2
 load('ex4weights.mat');
 % Unroll parameters 
-nn_params = Unroll_Theta({Theta1;Theta2});
+nn_params = Unroll({Theta1;Theta2});
 
 % Set theta
 nn.theta = Roll_Theta(nn_params,nn.nu);
 
-% Compute cost
-lambda = 0;
+% Compute cost and gradient
+lambda = 3;
 x = X; % x is same as training data
 y = y==1:10; % y has to be for each class
 [J,theta_grad] = nn.cost(x,y,nn.theta,lambda);
+
+% Do gradient checking using numerical gradient
+% costFunc = @(p) nn.cost(x,y,Roll_Theta(p,nn.nu),lambda);
+% numgrad = Num_Grad(costFunc,Unroll_Theta(nn.theta));
