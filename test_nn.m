@@ -37,7 +37,7 @@ nn_params = [Theta1(:) ; Theta2(:)];
 nn.theta = nn.roll_theta(nn_params);
 
 % Compute cost
-lambda = 0;
+lambda = 1;
 x = X; % x is same as training data
 y = y==1:10; % y has to be for each class
 [J,theta_grad] = nn.cost(x,y,nn.theta,lambda);

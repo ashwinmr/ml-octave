@@ -13,7 +13,8 @@ classdef nn_c < handle
   methods
   
     function t = unroll_theta(obj,theta)
-        
+    % Unroll a cell array of theta matrices into a single vectorize
+    
         nl = obj.nl; % number of layers
         t = []; % Initialize t
         
@@ -24,7 +25,9 @@ classdef nn_c < handle
     end
     
     function theta = roll_theta(obj,t)
-        
+    % Roll up a vector of theta values into a cell array of theta matrices for
+    % each layer in the neural network
+    
         nl = obj.nl; % number of layers
         nu = obj.nu; % number of units in each layer
         
@@ -42,7 +45,7 @@ classdef nn_c < handle
             
   
     function init_theta(obj,epsilon)
-        
+    % Initialize theta using randomization within a small epsilon value
         if nargin < 2, epsilon = 0.12; end
         
         nl = obj.nl; % number of layers
@@ -93,7 +96,7 @@ classdef nn_c < handle
 
         % Adding Regularization
         for i = 1:nl-1
-            J = J + lambda*(sum(sum(theta{i}(:,2:end).^2)));
+            J = J + lambda*(sum(sum(theta{i}(:,2:end).^2)))/2/m;
         end
         
         % Back propogation
