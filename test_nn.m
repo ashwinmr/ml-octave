@@ -13,7 +13,6 @@ addpath('Temp');
 nn = nn_c();
 
 % Set properties
-nn.nl = 3;
 nn.nu = [400;25;10];
 
 % Load Training Data
@@ -31,10 +30,10 @@ load('ex4data1.mat');
 % Load the weights into variables Theta1 and Theta2
 load('ex4weights.mat');
 % Unroll parameters 
-nn_params = [Theta1(:) ; Theta2(:)];
+nn_params = Unroll_Theta({Theta1;Theta2});
 
 % Set theta
-nn.theta = nn.roll_theta(nn_params);
+nn.theta = Roll_Theta(nn_params,nn.nu);
 
 % Compute cost
 lambda = 0;

@@ -2,7 +2,6 @@ classdef nn_c < handle
 
   properties
     
-    nl; % Number of layers
     nu; % Array of number of units in each layer (exclude bias)
     xtr; % Training examples
     ytr;
@@ -11,45 +10,13 @@ classdef nn_c < handle
   end
   
   methods
-  
-    function t = unroll_theta(obj,theta)
-    % Unroll a cell array of theta matrices into a single vector
-    
-        nt = size(theta,1); % number of thetas
-        t = []; % Initialize t
-        
-        for i= 1:nt
-            t = [t;theta{i}(:)];
-        end
-        
-    end
-    
-    function theta = roll_theta(obj,t)
-    % Roll up a vector of theta values into a cell array of theta matrices for
-    % each layer in the neural network
-    
-        nl = obj.nl; % number of layers
-        nu = obj.nu; % number of units in each layer
-        
-        theta = cell(nl-1,1);
-        count = 1;
-        
-        for i = 1:nl-1
-            r = nu(i+1); % number of rows
-            c = nu(i)+1; % number of columns
-            theta{i} = reshape(t(count:count-1+r*c),r,c);
-            count = count + r*c; % update the location of counter in the array
-        end
-        
-    end
-            
-  
+ 
     function init_theta(obj,epsilon)
     % Initialize theta using randomization within a small epsilon value
         if nargin < 2, epsilon = 0.12; end
-        
-        nl = obj.nl; % number of layers
+
         nu = obj.nu; % array of number of units in each layer
+        nl = size(nu,1); % number of layers
         
         theta = cell(nl,1);
         
@@ -68,8 +35,9 @@ classdef nn_c < handle
     % Computes the cost and gradient
     % The x input should not contain bias term
         if nargin < 5, lambda = 0; end
-
-        nl = obj.nl;
+        
+        nu = obj.nu; % array of number of units in each layer
+        nl = size(nu,1); % number of layers
         a = cell(nl,1); % Initialize activations
         z = cell(nl,1); % Initialize z
         delta = cell(nl,1); % Initialize delta
