@@ -13,12 +13,12 @@ classdef nn_c < handle
   methods
   
     function t = unroll_theta(obj,theta)
-    % Unroll a cell array of theta matrices into a single vectorize
+    % Unroll a cell array of theta matrices into a single vector
     
-        nl = obj.nl; % number of layers
+        nt = size(theta,1); % number of thetas
         t = []; % Initialize t
         
-        for i= 1:nl-1
+        for i= 1:nt
             t = [t;theta{i}(:)];
         end
         
