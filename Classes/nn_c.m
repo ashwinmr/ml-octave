@@ -3,6 +3,7 @@ classdef nn_c < handle
   properties
     
     nl; % Number of layers
+    nu; % Array of number of units in each layer (exclude bias)
     xtr; % Training examples
     ytr;
     theta; % Cell array of matrices
@@ -86,7 +87,7 @@ classdef nn_c < handle
 
         % Adding Regularization
         for i = 1:nl-1
-            J = J + lambda*(sum(sum(theta{i}(:,2:end).^2));
+            J = J + lambda*(sum(sum(theta{i}(:,2:end).^2)));
         end
         
         % Back propogation
@@ -114,3 +115,5 @@ classdef nn_c < handle
     end
   
   end
+  
+end
