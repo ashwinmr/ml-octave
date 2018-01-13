@@ -3,15 +3,49 @@ classdef nn_c < handle
   properties
     
     nu; % Array of number of units in each layer (exclude bias)
-    xtr; % Training examples
-    ytr;
-    theta; % Cell array of matrices
     
   end
   
   methods
+  
+    function [theta,J] = learn(obj,x,y,iters,lambda,algo)
+    % Learns the theta using training set and selected algorithm
+    % algorithm can be fminunc or fmincg
+    
+        if nargin < 6, algo = 'fmincg'; end
+            
+        nu = obj.nu; % array of number of units in each layer
+        initial_theta = obj.init_theta(); % Initial theta
+        
+        % Create function pointer for the cost function to be minimized
+        cost_func = @(t) obj.cost(x,y,Roll_Theta(t,nu),lambda);
+        
+        if strcmp(algo,'fminunc')
+            % Use fminunc algorithm
+            
+            % Set options
+            options = optimset('GradObj', 'on', 'MaxIter', iters);
+            
+            % Optimize
+            [theta,J,exit_flag] = fminunc(cost_func,Unroll(initial_theta),options);
+            
+        else
+            % Use the default fmincg algorithm
+            
+            % Set options
+            options = optimset('MaxIter', iters);
+            
+            % Optimize
+            [theta,J] = Fmincg(cost_func,Unroll(initial_theta),options);
+            
+        end
+        
+        % Reroll theta
+        theta = Roll_Theta(theta,nu);
+        
+    end
  
-    function init_theta(obj,epsilon)
+    function theta = init_theta(obj,epsilon)
     % Initialize theta using randomization within a small epsilon value
         if nargin < 2, epsilon = 0.12; end
 
@@ -26,14 +60,15 @@ classdef nn_c < handle
             
         end
         
-        % Set the object property
-        obj.theta = theta;
-        
     end
   
     function [J,theta_grad] = cost(obj,x,y,theta,lambda)
     % Computes the cost and gradient
     % The x input should not contain bias term
+    % Theta should be in the rolled form
+    % theta_grad output is in the unrolled form so it can be used by optimization algos
+    
+    
         if nargin < 5, lambda = 0; end
         
         nu = obj.nu; % array of number of units in each layer
@@ -86,6 +121,9 @@ classdef nn_c < handle
             theta_grad{i}(:,2:end) = theta_grad{i}(:,2:end) + theta{i}(:,2:end)*lambda/m;
             
         end
+        
+        % Unroll the gradients
+        theta_grad = Unroll(theta_grad);
         
     end
   
