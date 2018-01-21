@@ -3,12 +3,36 @@ classdef nn_c < handle
   properties
     
     nu; % Array of number of units in each layer (exclude bias)
+    theta_l; % Learned theta
     
   end
   
   methods
   
-    function [theta,J] = learn(obj,x,y,iters,lambda,algo)
+    function pred = predict(obj,x,theta_l)
+    % Predict the output for an input x and theta
+    % If theta is not provided, the learned theta is used
+    if nargin < 3, theta_l = obj.theta_l; end
+        
+        nu = obj.nu; % array of number of units in each layer
+        nl = size(nu,1); % number of layers
+
+        a = Add_Bias(x); % First layer activation is the examples itself. a has bias
+        
+        % Forward propagation
+        for i = 1:nl-1
+            z = a*theta_l{i}';
+            a = Add_Bias(Sigmoid(z));
+        end
+        
+        % Remove bias from the output
+        a = Remove_Bias(a); % The output should not have bias
+        
+        pred = a;
+        
+    end
+  
+    function [theta_l,J] = learn(obj,x,y,iters,lambda,algo)
     % Learns the theta using training set and selected algorithm
     % algorithm can be fminunc or fmincg
     
@@ -41,7 +65,10 @@ classdef nn_c < handle
         end
         
         % Reroll theta
-        theta = Roll_Theta(theta,nu);
+        theta_l = Roll_Theta(theta,nu);
+        
+        % Store the learned theta
+        obj.theta_l = theta_l;
         
     end
  

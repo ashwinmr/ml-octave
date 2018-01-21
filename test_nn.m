@@ -36,6 +36,7 @@ theta = Roll_Theta(nn_params,nn.nu);
 % Compute cost and gradient
 lambda = 3;
 x = X; % x is same as training data
+Y = y; % Store y in temporary variable
 y = y==1:10; % y has to be for each class
 [J,theta_grad] = nn.cost(x,y,theta,lambda);
 
@@ -45,8 +46,7 @@ y = y==1:10; % y has to be for each class
 
 % Learning
 
-% Init theta
-max_iter = 10;
+max_iter = 50;
 lambda = 1;
 tic;
 theta = nn.learn(x,y,max_iter,lambda);
@@ -55,3 +55,8 @@ toc;
 % See what was learned
 displayData(theta{1}(:,2:end));
 
+% Prediction
+pred = nn.predict(x);
+[~,pred] = max(pred');
+pred = pred(:);
+fprintf('\nTraining Set Accuracy: %f\n', mean(double(pred == Y)) * 100);
