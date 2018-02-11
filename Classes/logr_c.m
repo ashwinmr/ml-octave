@@ -49,7 +49,7 @@ classdef logr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta
-        theta = zeros(nc,nf);
+        theta = zeros(nc,nf+1);
 
         % Optimize
         [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda,0);
@@ -97,7 +97,7 @@ classdef logr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta (could have multiple classes)
-        theta = zeros(nc,nf);
+        theta = zeros(nc,nf+1);
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
@@ -119,7 +119,7 @@ classdef logr_c < handle
 
         % Set constants
         m = size(x,1);
-        nf = size(x,2);
+        nf = size(x,2)-1;
         nc = size(y,2);
 
         % Initialize

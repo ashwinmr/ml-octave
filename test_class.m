@@ -22,7 +22,7 @@ y = v;
 alpha = 0.1;
 max_iter = 1500;
 lambda = 0;
-linr.learn(x,y,max_iter,lambda);
+linr.learn_grad(x,y,alpha);
 
 % Predict
 y_predicted = linr.predict(x);

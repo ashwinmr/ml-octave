@@ -14,6 +14,7 @@ classdef linr_c < handle
       % This function computes the cost function for x, y and theta.
       % It allows regularization
       % theta is a row vector corresponding to x
+      % Gradient is returned in unrolled form so it can be used by optimization algos
       if nargin < 5, lambda = 0; end
       
       % set constants
@@ -26,6 +27,7 @@ classdef linr_c < handle
       
       % Compute gradient
       gradient = (x'*(h-y)/m)' + [zeros(size(theta,1),1),theta(:,2:end)*lambda/m];
+      gradient = Unroll(gradient);
 
     end
     
@@ -38,6 +40,7 @@ classdef linr_c < handle
         % set constants
         m = length(x);
         nf = size(x,2);
+        nc = size(y,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -48,7 +51,7 @@ classdef linr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta
-        theta = zeros(1,nf+1);
+        theta = zeros(nc,nf+1);
 
         % Optimize
         [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda);
@@ -91,7 +94,7 @@ classdef linr_c < handle
         
         % Use normal equation to solve
         theta_l = (x'*x)^-1*x'*y;
-        theta_l = theta_l(:)';
+        theta_l = theta_l';
         obj.mu = 0;
         obj.sigma = 1;
 
@@ -107,6 +110,7 @@ classdef linr_c < handle
         % set constants
         m = length(x);
         nf = size(x,2);
+        nc = size(y,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -116,16 +120,18 @@ classdef linr_c < handle
         % Add bias
         x = [ones(m,1),x];
 
-        % Initialize theta
-        theta = zeros(1,nf+1);
+        % Initialize theta (could have multiple classes)
+        theta = zeros(nc,nf+1);
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
         
         % Optimize
-        func = @(t)(obj.cost(x,y,t,lambda));
-        [theta_l, J, exit_flag] = fminunc(func,theta,options);
+        func = @(t)(obj.cost(x,y,Roll_Theta(t,[nf,nc]),lambda));
+        [theta_l, J, exit_flag] = fminunc(func,Unroll(theta),options);
         
+        % Roll theta_l
+        theta_l = Roll_Theta(theta_l,[nf;nc]);
         obj.theta_l = theta_l;
         
     end
