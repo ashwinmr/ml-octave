@@ -9,10 +9,11 @@ classdef nn_c < handle
   
   methods
   
-    function pred = predict(obj,x,theta_l)
+    function pred = predict(obj,x,theta_l,threshold)
     % Predict the output for an input x and theta
     % If theta is not provided, the learned theta is used
     if nargin < 3, theta_l = obj.theta_l; end
+    if nargin < 4, threshold = 0.5; end
         
         nu = obj.nu; % array of number of units in each layer
         nl = size(nu,1); % number of layers
@@ -28,7 +29,15 @@ classdef nn_c < handle
         % Remove bias from the output
         a = Remove_Bias(a); % The output should not have bias
         
-        pred = a;
+        pred = a >= threshold;
+        
+    end
+    
+    function [err] = pred_error(obj,x,y,theta_l)
+        % This function calculates the error of prediction for an x and y
+        
+        # Cost function with lambda = 0 is the prediction error
+        err = obj.cost(x,y,theta_l,0)
         
     end
   

@@ -18,14 +18,40 @@ linr = linr_c();
 x = [p,p.^0.5];
 y = v;
 
-% Perform gradient descent
+% Set constants
 alpha = 0.1;
-max_iter = 1500;
+max_iter = 100;
 lambda = 0;
-linr.learn_grad(x,y,alpha);
 
-% Predict
+% Learn
+linr.learn(x,y,max_iter,lambda);
 y_predicted = linr.predict(x);
+
+%{
+% Learning curves
+ex = randperm(length(x));
+m = [5:50];
+Jt = zeros(length(m),1);
+Jc = zeros(length(m),1);
+
+for i = 1:length(m)
+    
+    % Training error
+    Xt = x(ex(1:m(i)),:);
+    Yt = y(ex(1:m(i)),:);
+    linr.learn(Xt,Yt,max_iter,lambda);
+    Jt(i) = linr.pred_error(Xt,Yt);
+    
+    % Cross validation error
+    Xc = x(ex(300:end),:);
+    Yc = y(ex(300:end),:);
+    Jc(i) = linr.pred_error(Xc,Yc);
+    
+end
+
+plot(m,Jt,m,Jc);
+legend('J Train','J CV');
+%}
 
 % Plot
 plot(p,v,'*'); % Plot the training data
@@ -36,3 +62,4 @@ xlabel('x');
 ylabel('y');
 legend('Training Data','Prediction');
 hold off;
+%}

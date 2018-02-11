@@ -15,6 +15,7 @@ classdef linr_c < handle
       % It allows regularization
       % theta is a row vector corresponding to x
       % Gradient is returned in unrolled form so it can be used by optimization algos
+      % x should already contain bias term
       if nargin < 5, lambda = 0; end
       
       % set constants
@@ -38,7 +39,7 @@ classdef linr_c < handle
         if nargin < 6, lambda = 0; end
 
         % set constants
-        m = length(x);
+        m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
         
@@ -80,6 +81,19 @@ classdef linr_c < handle
          
     end
     
+    function [err] = pred_error(obj,x,y,theta_l)
+        % This function calculates the error of prediction for an x and y
+        if nargin < 4, theta_l = obj.theta_l; end
+        
+        % set constants
+        m = size(x,1);
+        
+        pred = obj.predict(x,theta_l);
+        
+        err = sum((pred - y).^2)/2/m;
+        
+    end
+    
     function [theta_l] = learn_normal(obj,x,y)
         % This function obtains the optimal theta for linear regression without gradient descent
         % Note that the theta calculated using the normal equation will be different from
@@ -87,7 +101,7 @@ classdef linr_c < handle
         % feature normalization
 
         % set constants
-        m = length(x);
+        m = size(x,1);
         
         % Add bias
         x = [ones(m,1),x];
@@ -108,7 +122,7 @@ classdef linr_c < handle
         if nargin < 5; lambda = 0; end
 
         % set constants
-        m = length(x);
+        m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
         

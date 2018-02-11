@@ -36,7 +36,7 @@ classdef logr_c < handle
     % x and y using gradient descent
 
         % set constants
-        m = length(x);
+        m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
         
@@ -78,13 +78,25 @@ classdef logr_c < handle
       
     end
     
+    function [err] = pred_error(obj,x,y,theta_l,threshold)
+        % This function calculates the error of prediction for an x and y
+        
+        % set constants
+        m = size(x,1);
+        
+        pred = obj.predict(x,theta_l,threshold);
+        
+        err = sum(-y.*log(pred)-(1-y).*log(1-pred))/m
+        
+    end
+    
     function [theta_l,J] = learn(obj,x,y,max_iter,lambda)
         % This function finds the optimal theta for a training set using fminunc
         if nargin < 4; max_iter = 500; end
         if nargin < 5; lambda = 0; end
 
         % set constants
-        m = length(x);
+        m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
         
