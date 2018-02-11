@@ -31,7 +31,7 @@ classdef linr_c < handle
 
     end
     
-    function [theta_l,mu,sigma,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
+    function [theta_l,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
     % This function uses machine learning to learn a model for training data
     % x and y using gradient descent
         if nargin < 5, num_iters = 500; end
@@ -54,7 +54,7 @@ classdef linr_c < handle
         theta = zeros(nc,nf+1);
 
         % Optimize
-        [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda);
+        [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda,0);
         
         obj.theta_l = theta_l;
     end
@@ -80,7 +80,7 @@ classdef linr_c < handle
          
     end
     
-    function [theta_l] = normal_solve(obj,x,y)
+    function [theta_l] = learn_normal(obj,x,y)
         % This function obtains the optimal theta for linear regression without gradient descent
         % Note that the theta calculated using the normal equation will be different from
         % the one you get using gradient descent since the normal equation does not use
@@ -102,7 +102,7 @@ classdef linr_c < handle
 
     end
     
-    function [theta_l,mu,sigma,J] = learn(obj,x,y,max_iter,lambda)
+    function [theta_l,J] = learn(obj,x,y,max_iter,lambda)
         % This function finds the optimal theta for a training set using fminunc
         if nargin < 4; max_iter = 500; end
         if nargin < 5; lambda = 0; end

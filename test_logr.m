@@ -11,29 +11,26 @@ addpath('Classes');
 load('x_log');
 load('y_log');
 
-% Create an object of ML class
-ml = ML_C();
-
-% Set the x and y for the class
-ml.Set_x(x);
-ml.Set_y(y);
+% Create an object of logr class class
+logr = logr_c();
 
 % Perform logistic regression
+alpha = 0.1;
 lambda = 0;
-n = 500;
-ml.Optimize_Logistic(lambda,n);
+max_iter = 500;
+logr.learn_grad(x,y,alpha,max_iter,lambda);
 
 % Predict
-y_predicted = ml.Predict_Logistic(x);
+y_predicted = logr.predict(x);
 
 % Plotting
 
 % Only need 2 points to define a line, so choose two endpoints
 plot_x = [min(x(:,1)),  max(x(:,1))];
-plot_x_n = ML_C.Feature_Normalize(plot_x,ml.mu,ml.sigma);
+plot_x_n = Feature_Normalize(plot_x,logr.mu,logr.sigma);
 % Calculate the decision boundary line
-plot_y_n = (-1./ml.theta(3)).*(ml.theta(2).*plot_x_n + ml.theta(1));
-plot_y = ML_C.Feature_De_Normalize(plot_y_n,ml.mu,ml.sigma);
+plot_y_n = (-1./logr.theta_l(3)).*(logr.theta_l(2).*plot_x_n + logr.theta_l(1));
+plot_y = Feature_De_Normalize(plot_y_n,logr.mu,logr.sigma);
 
 % Find indices of positive and negative examples
 pos = find(y==1); 

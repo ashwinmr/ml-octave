@@ -31,7 +31,7 @@ classdef logr_c < handle
 
     end
     
-    function [theta_l,mu,sigma,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
+    function [theta_l,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
     % This function uses machine learning to learn a model for training data
     % x and y using gradient descent
 
@@ -78,7 +78,7 @@ classdef logr_c < handle
       
     end
     
-    function [theta_l,mu,sigma,J] = learn(obj,x,y,max_iter,lambda)
+    function [theta_l,J] = learn(obj,x,y,max_iter,lambda)
         % This function finds the optimal theta for a training set using fminunc
         if nargin < 4; max_iter = 500; end
         if nargin < 5; lambda = 0; end
