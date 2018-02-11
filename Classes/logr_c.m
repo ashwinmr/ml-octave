@@ -88,7 +88,7 @@ classdef logr_c < handle
         [pred_raw,pred] = obj.predict(x,theta_l,threshold);
         ind = pred ~= y; % Indices of errors
         
-        err = sum(-y.*log(pred_raw)-(1-y).*log(1-pred_raw))/m
+        err = sum(-y.*log(pred_raw)-(1-y).*log(1-pred_raw))/m;
         
     end
     

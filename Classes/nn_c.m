@@ -9,7 +9,7 @@ classdef nn_c < handle
   
   methods
   
-    function pred = predict(obj,x,theta_l,threshold)
+    function [pred_raw,pred] = predict(obj,x,theta_l,threshold)
     % Predict the output for an input x and theta
     % If theta is not provided, the learned theta is used
     if nargin < 3, theta_l = obj.theta_l; end
@@ -29,15 +29,19 @@ classdef nn_c < handle
         % Remove bias from the output
         a = Remove_Bias(a); % The output should not have bias
         
-        pred = a >= threshold;
+        % Predict
+        pred_raw = a;
+        pred = pred_raw >= threshold;
         
     end
     
-    function [err] = pred_error(obj,x,y,theta_l)
+    function [err,ind] = pred_error(obj,x,y,theta_l)
         % This function calculates the error of prediction for an x and y
         
-        # Cost function with lambda = 0 is the prediction error
-        err = obj.cost(x,y,theta_l,0)
+        [pred_raw,pred] = obj.predict(x,theta_l,threshold);
+        ind = pred ~= y; % Indices of errors
+        
+        err = sum(-log(pred_raw).*y-log(1-pred_raw).*(1-y))/m;
         
     end
   
