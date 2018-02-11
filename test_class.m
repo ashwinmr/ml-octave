@@ -11,22 +11,21 @@ addpath('Classes');
 load('p');
 load('v');
 
-% Create an object of ML class
-ml = ML_C();
+% Create an object of linr class
+linr = linr_c();
 
 % Set the x and y for the class
-x = [p,p.^2,p.^3];
-ml.Set_x(x);
-ml.Set_y(v);
+x = [p,p.^0.5];
+y = v;
 
 % Perform gradient descent
 alpha = 0.1;
-n = 1500;
+max_iter = 1500;
 lambda = 0;
-ml.Optimize_Linear(lambda,n);
+linr.normal_solve(x,y);
 
 % Predict
-y_predicted = ml.Predict_Linear(x);
+y_predicted = linr.predict(x);
 
 % Plot
 plot(p,v,'*'); % Plot the training data

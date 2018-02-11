@@ -1,4 +1,4 @@
-classdef linr < handle
+classdef linr_c < handle
 
   properties
   
@@ -56,7 +56,7 @@ classdef linr < handle
     function [pred] = predict(obj,x,theta_l)
     % This function predicts the output using a learned theta for x
         
-        if nargin < 5, theta_l = obj.theta_l; end
+        if nargin < 3, theta_l = obj.theta_l; end
             
         % set constants
         m = size(x,1);
@@ -75,14 +75,24 @@ classdef linr < handle
     end
     
     function [theta_l] = normal_solve(obj,x,y)
-      % This function obtains the optimal theta for linear regression without gradient descent
-      % Note that the theta calculated using the normal equation will be different from
-      % the one you get using gradient descent since the normal equation does not use
-      % feature normalization
-      
-      theta_l = (x'*x)^-1*x'*y;
-      
-      obj.theta_l = theta_l;
+        % This function obtains the optimal theta for linear regression without gradient descent
+        % Note that the theta calculated using the normal equation will be different from
+        % the one you get using gradient descent since the normal equation does not use
+        % feature normalization
+
+        % set constants
+        m = length(x);
+        
+        % Add bias
+        x = [ones(m,1),x];
+        
+        % Use normal equation to solve
+        theta_l = (x'*x)^-1*x'*y;
+        theta_l = theta_l(:)';
+        obj.mu = 0;
+        obj.sigma = 1;
+
+        obj.theta_l = theta_l;
 
     end
     
@@ -96,6 +106,8 @@ classdef linr < handle
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
+        obj.mu = mu;
+        obj.sigma = sigma;
 
         % Add bias
         x = [ones(m,1),x];
@@ -115,3 +127,5 @@ classdef linr < handle
     end
   
   end
+  
+end
