@@ -2,7 +2,7 @@ classdef nn_c < handle
 
   properties
     
-    nu; % Array of number of units in each layer (exclude bias)
+    nu; % Array of number of units in each layer (exclude bias, include input and output layer)
     theta_l; % Learned theta
     
   end

@@ -48,9 +48,7 @@ y = y==1:10; % y has to be for each class
 
 max_iter = 50;
 lambda = 1;
-tic;
 theta = nn.learn(x,y,max_iter,lambda);
-toc;
 
 % See what was learned
 displayData(theta{1}(:,2:end));
