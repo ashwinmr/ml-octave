@@ -57,7 +57,7 @@ classdef logr_c < handle
         obj.theta_l = theta_l;
     end
     
-    function [pred] = predict(obj,x,theta_l,threshold)
+    function [pred_raw,pred] = predict(obj,x,theta_l,threshold)
         % Function to predict the result of logistic regression
         if nargin < 3, theta_l = obj.theta_l; end
         if nargin < 4, threshold = 0.5; end
@@ -74,19 +74,21 @@ classdef logr_c < handle
         x = [ones(m,1),x];
         
         % Predict
-        pred = Sigmoid(x*theta_l') >= threshold;
+        pred_raw = Sigmoid(x*theta_l');
+        pred = pred_raw >= threshold;
       
     end
     
-    function [err] = pred_error(obj,x,y,theta_l,threshold)
+    function [err,ind] = pred_error(obj,x,y,theta_l,threshold)
         % This function calculates the error of prediction for an x and y
         
         % set constants
         m = size(x,1);
         
-        pred = obj.predict(x,theta_l,threshold);
+        [pred_raw,pred] = obj.predict(x,theta_l,threshold);
+        ind = pred ~= y; % Indices of errors
         
-        err = sum(-y.*log(pred)-(1-y).*log(1-pred))/m
+        err = sum(-y.*log(pred_raw)-(1-y).*log(1-pred_raw))/m
         
     end
     
