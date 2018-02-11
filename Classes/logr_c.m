@@ -1,4 +1,4 @@
-classdef linr_c < handle
+classdef logr_c < handle
 
   properties
   
@@ -11,21 +11,20 @@ classdef linr_c < handle
   methods
     
     function [J, gradient] = cost(obj,x,y,theta,lambda)
-      % This function computes the cost function for x, y and theta.
-      % It allows regularization
-      % theta is a row vector corresponding to x
-      if nargin < 5, lambda = 0; end
-      
-      % set constants
-      m = size(x,1);
-      
-      h = x*theta';
-      
-      % Calculate cost function
-      J = sum((h-y).^2)/2/m + sum(theta(:,2:end).^2)*lambda/2/m;
-      
-      % Compute gradient
-      gradient = (x'*(h-y)/m)' + [zeros(size(theta,1),1),theta(:,2:end)*lambda/m];
+        % This function computes the cost function for logistic regression
+        % It allows regularization
+        if nargin < 5, lambda = 0; end
+
+        % Set constants
+        m = size(x,1);
+
+        h = Sigmoid(x*theta');
+
+        % Compute cost
+        J = sum(-y.*log(h)-(1-y).*log(1-h))/m + sum(theta(:,2:end).^2)*lambda/2/m;
+
+        % Compute gradient
+        gradient = (x'*(h-y)/m)' + [zeros(size(theta,1),1),theta(:,2:end)*lambda/m];
 
     end
     
@@ -53,10 +52,10 @@ classdef linr_c < handle
         obj.theta_l = theta_l;
     end
     
-    function [pred] = predict(obj,x,theta_l)
-    % This function predicts the output using a learned theta for x
-        
+    function [pred] = predict(obj,x,theta_l,threshold)
+        % Function to predict the result of logistic regression
         if nargin < 3, theta_l = obj.theta_l; end
+        if nargin < 4, threshold = 0.5; end
             
         % set constants
         m = size(x,1);
@@ -70,30 +69,8 @@ classdef linr_c < handle
         x = [ones(m,1),x];
         
         % Predict
-        pred = x*theta_l';
-         
-    end
-    
-    function [theta_l] = normal_solve(obj,x,y)
-        % This function obtains the optimal theta for linear regression without gradient descent
-        % Note that the theta calculated using the normal equation will be different from
-        % the one you get using gradient descent since the normal equation does not use
-        % feature normalization
-
-        % set constants
-        m = length(x);
-        
-        % Add bias
-        x = [ones(m,1),x];
-        
-        % Use normal equation to solve
-        theta_l = (x'*x)^-1*x'*y;
-        theta_l = theta_l(:)';
-        obj.mu = 0;
-        obj.sigma = 1;
-
-        obj.theta_l = theta_l;
-
+        pred = Sigmoid(x*theta_l') >= threshold;
+      
     end
     
     function [theta_l,mu,sigma,J] = learn(obj,x,y,max_iter,lambda)
