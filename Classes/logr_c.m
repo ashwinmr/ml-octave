@@ -13,6 +13,8 @@ classdef logr_c < handle
     function [J, gradient] = cost(obj,x,y,theta,lambda)
         % This function computes the cost function for logistic regression
         % It allows regularization
+        % Theta is in the rolled form
+        % Gradient is returned in unrolled form so it can be used by optimization algos
         if nargin < 5, lambda = 0; end
 
         % Set constants
@@ -25,6 +27,7 @@ classdef logr_c < handle
 
         % Compute gradient
         gradient = (x'*(h-y)/m)' + [zeros(size(theta,1),1),theta(:,2:end)*lambda/m];
+        gradient = Unroll(gradient);
 
     end
     
@@ -34,6 +37,8 @@ classdef logr_c < handle
 
         % set constants
         m = length(x);
+        nf = size(x,2);
+        nc = size(y,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -44,10 +49,10 @@ classdef logr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta
-        theta = zeros(1,size(x,2));
+        theta = zeros(nc,nf);
 
         % Optimize
-        [theta_l,J_history] = Gradient_Descent(x,y,theta,alpha,num_iters,lambda);
+        [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda,0);
         
         obj.theta_l = theta_l;
     end
@@ -80,6 +85,8 @@ classdef logr_c < handle
 
         % set constants
         m = length(x);
+        nf = size(x,2);
+        nc = size(y,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -89,18 +96,58 @@ classdef logr_c < handle
         % Add bias
         x = [ones(m,1),x];
 
-        % Initialize theta
-        theta = zeros(1,size(x,2));
+        % Initialize theta (could have multiple classes)
+        theta = zeros(nc,nf);
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
         
         % Optimize
-        func = @(t)(obj.cost(x,y,t,lambda));
-        [theta_l, J, exit_flag] = fminunc(func,theta,options);
+        func = @(t)(obj.cost(x,y,Roll_Theta(t,[nf,nc]),lambda));
+        [theta_l, J, exit_flag] = fminunc(func,Unroll(theta),options);
         
+        % Roll theta_l
+        theta_l = Roll_Theta(theta_l,[nf;nc]);
         obj.theta_l = theta_l;
         
+    end
+    
+    function [theta,J_history] = gradient_descent(obj,x,y,theta,alpha,num_iters,lambda,debugplot)
+    % This function performs gradient descent on theta for a given x, y and number of iterations
+        if nargin < 7, lambda = 0; end
+        if nargin < 8, debugplot = 0; end
+
+        % Set constants
+        m = size(x,1);
+        nf = size(x,2);
+        nc = size(y,2);
+
+        % Initialize
+        J_history = zeros(num_iters,1);
+
+        for i = 1:num_iters
+
+            [J_history(i),gradient] = obj.cost(x,y,theta,lambda);
+            
+            % Roll the gradient
+            gradient = Roll_Theta(gradient,[nf;nc]);
+
+            % Take a gradient step
+            theta = theta - alpha*gradient;
+
+        end
+
+        % Plotting
+        if debugplot
+
+            plot(J_history);
+            xlabel('Iteration');
+            ylabel('Cost');
+            grid on;
+            title('Gradient Descent');
+
+        end
+
     end
   
   end

@@ -32,9 +32,12 @@ classdef linr_c < handle
     function [theta_l,mu,sigma,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
     % This function uses machine learning to learn a model for training data
     % x and y using gradient descent
+        if nargin < 5, num_iters = 500; end
+        if nargin < 6, lambda = 0; end
 
         % set constants
         m = length(x);
+        nf = size(x,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -45,10 +48,10 @@ classdef linr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta
-        theta = zeros(1,size(x,2));
+        theta = zeros(1,nf+1);
 
         % Optimize
-        [theta_l,J_history] = Gradient_Descent(x,y,theta,alpha,num_iters,lambda);
+        [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda);
         
         obj.theta_l = theta_l;
     end
@@ -103,6 +106,7 @@ classdef linr_c < handle
 
         % set constants
         m = length(x);
+        nf = size(x,2);
         
         % Feature Normalize
         [x,mu,sigma] = Feature_Normalize(x);
@@ -113,7 +117,7 @@ classdef linr_c < handle
         x = [ones(m,1),x];
 
         % Initialize theta
-        theta = zeros(1,size(x,2));
+        theta = zeros(1,nf+1);
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
@@ -126,6 +130,45 @@ classdef linr_c < handle
         
     end
   
+    function [theta,J_history] = gradient_descent(obj,x,y,theta,alpha,num_iters,lambda,debugplot)
+    % This function performs gradient descent on theta for a given x, y and number of iterations
+    % x should already have bias
+        if nargin < 7, lambda = 0; end
+        if nargin < 8, debugplot = 0; end
+
+        % Set constants
+        m = size(x,1);
+        nf = size(x,2)-1;
+        nc = size(y,2);
+
+        % Initialize
+        J_history = zeros(num_iters,1);
+
+        for i = 1:num_iters
+
+            [J_history(i),gradient] = obj.cost(x,y,theta,lambda);
+            
+            % Roll the gradient
+            gradient = Roll_Theta(gradient,[nf;nc]);
+
+            % Take a gradient step
+            theta = theta - alpha*gradient;
+
+        end
+
+        % Plotting
+        if debugplot
+
+            plot(J_history);
+            xlabel('Iteration');
+            ylabel('Cost');
+            grid on;
+            title('Gradient Descent');
+
+        end
+
+    end
+
   end
   
 end
