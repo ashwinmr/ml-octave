@@ -79,16 +79,28 @@ classdef logr_c < handle
       
     end
     
-    function [err,ind] = pred_error(obj,x,y,theta_l,threshold)
+    function [err,ind,fscore] = pred_error(obj,x,y,theta_l,threshold)
         % This function calculates the error of prediction for an x and y
-        
+        if nargin < 4, theta_l = obj.theta_l; end
+        if nargin < 5, threshold = 0.5; end
+            
         % set constants
         m = size(x,1);
         
         [pred_raw,pred] = obj.predict(x,theta_l,threshold);
-        ind = pred ~= y; % Indices of errors
+        ind = find(pred ~= y); % Indices of errors
         
         err = sum(-y.*log(pred_raw)-(1-y).*log(1-pred_raw))/m;
+        
+        % Calculating f_score
+        stp = sum(sum(and(pred,y))); % True positive
+        sfp = sum(sum(and(pred,~y))); % False positive
+        sfn = sum(sum(and(~pred,y))); % False negative
+        
+        prec = stp/(stp + sfp); % Precision
+        rec = stp/(stp + sfn); % Recall
+        
+        fscore = 2*(prec*rec)/(prec + rec);
         
     end
     
