@@ -18,6 +18,7 @@ logr = logr_c();
 alpha = 0.1;
 lambda = 0;
 max_iter = 500;
+logr.init(x,y);
 logr.learn_grad(x,y,alpha,max_iter,lambda);
 
 % Predict

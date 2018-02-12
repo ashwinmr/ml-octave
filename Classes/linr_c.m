@@ -9,6 +9,20 @@ classdef linr_c < handle
   end
   
   methods
+  
+    function [] = init(obj,x,y)
+        
+        % Feature Normalize
+        [~,mu,sigma] = Feature_Normalize(x);
+        obj.mu = mu;
+        obj.sigma = sigma;
+        
+        % Initialize theta
+        nf = size(x,2);
+        nc = size(y,2);
+        obj.theta_l = zeros(nc,nf+1);
+        
+    end
     
     function [J, gradient] = cost(obj,x,y,theta,lambda)
       % This function computes the cost function for x, y and theta.
@@ -32,31 +46,42 @@ classdef linr_c < handle
 
     end
     
-    function [theta_l,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda)
+    function [theta_l,J_history] = learn_grad(obj,x,y,alpha,num_iters,lambda,theta)
     % This function uses machine learning to learn a model for training data
     % x and y using gradient descent
         if nargin < 5, num_iters = 500; end
         if nargin < 6, lambda = 0; end
+        if nargin < 7, theta = obj.theta_l; end
 
         % set constants
         m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
+        mu = obj.mu;
+        sigma = obj.sigma;
         
         % Feature Normalize
-        [x,mu,sigma] = Feature_Normalize(x);
-        obj.mu = mu;
-        obj.sigma = sigma;
+        x = Feature_Normalize(x,mu,sigma);
 
         % Add bias
         x = [ones(m,1),x];
-
-        % Initialize theta
-        theta = zeros(nc,nf+1);
-
-        % Optimize
-        [theta_l,J_history] = obj.gradient_descent(x,y,theta,alpha,num_iters,lambda,0);
         
+        % Initialize J_history
+        J_history = zeros(num_iters,1);
+        
+        for i = 1:num_iters
+
+            [J_history(i),gradient] = obj.cost(x,y,theta,lambda);
+            
+            % Roll the gradient
+            gradient = Roll_Theta(gradient,[nf;nc]);
+
+            % Take a gradient step
+            theta = theta - alpha*gradient;
+
+        end
+        
+        theta_l = theta;
         obj.theta_l = theta_l;
     end
     
@@ -116,26 +141,24 @@ classdef linr_c < handle
 
     end
     
-    function [theta_l,J] = learn(obj,x,y,max_iter,lambda)
+    function [theta_l,J] = learn(obj,x,y,max_iter,lambda,theta)
         % This function finds the optimal theta for a training set using fminunc
         if nargin < 4; max_iter = 500; end
         if nargin < 5; lambda = 0; end
+        if nargin < 6; theta = obj.theta_l; end
 
         % set constants
         m = size(x,1);
         nf = size(x,2);
         nc = size(y,2);
+        mu = obj.mu;
+        sigma = obj.sigma;
         
         % Feature Normalize
-        [x,mu,sigma] = Feature_Normalize(x);
-        obj.mu = mu;
-        obj.sigma = sigma;
+        x = Feature_Normalize(x,mu,sigma);
 
         % Add bias
         x = [ones(m,1),x];
-
-        % Initialize theta (could have multiple classes)
-        theta = zeros(nc,nf+1);
             
         % Set options
         options = optimset('GradObj', 'on', 'MaxIter', max_iter);
@@ -148,45 +171,6 @@ classdef linr_c < handle
         theta_l = Roll_Theta(theta_l,[nf;nc]);
         obj.theta_l = theta_l;
         
-    end
-  
-    function [theta,J_history] = gradient_descent(obj,x,y,theta,alpha,num_iters,lambda,debugplot)
-    % This function performs gradient descent on theta for a given x, y and number of iterations
-    % x should already have bias
-        if nargin < 7, lambda = 0; end
-        if nargin < 8, debugplot = 0; end
-
-        % Set constants
-        m = size(x,1);
-        nf = size(x,2)-1;
-        nc = size(y,2);
-
-        % Initialize
-        J_history = zeros(num_iters,1);
-
-        for i = 1:num_iters
-
-            [J_history(i),gradient] = obj.cost(x,y,theta,lambda);
-            
-            % Roll the gradient
-            gradient = Roll_Theta(gradient,[nf;nc]);
-
-            % Take a gradient step
-            theta = theta - alpha*gradient;
-
-        end
-
-        % Plotting
-        if debugplot
-
-            plot(J_history);
-            xlabel('Iteration');
-            ylabel('Cost');
-            grid on;
-            title('Gradient Descent');
-
-        end
-
     end
 
   end

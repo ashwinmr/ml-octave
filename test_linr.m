@@ -24,7 +24,8 @@ max_iter = 100;
 lambda = 0;
 
 % Learn
-linr.learn(x,y,max_iter,lambda);
+linr.init(x,y);
+linr.learn_grad(x,y,alpha,max_iter,lambda);
 y_predicted = linr.predict(x);
 
 %{
