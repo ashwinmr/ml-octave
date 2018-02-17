@@ -16,6 +16,16 @@ classdef kmeans_c < handle
             centroids = x(randidx(1:k), :);
         end
         
+        function J = cost(obj,x,idx,centroids)
+        % Compute the cost of chosen centroids
+            
+            % Set constants
+            m = size(x,1);
+            
+            J = sum(sum((x - centroids(idx,:)).^2))/m;
+
+        end
+        
         function idx = find_closest(obj,x,centroids)
         %FINDCLOSESTCENTROIDS computes the centroid memberships for every example
         % Centroids is a matrix with each row representing a centroid
@@ -45,7 +55,7 @@ classdef kmeans_c < handle
 
         end
         
-        function [centroids,idx] = learn(obj,x,k,max_iters,initial_centroids)
+        function [centroids,idx,J_history] = learn(obj,x,k,max_iters,initial_centroids)
         %RUNKMEANS runs the K-Means algorithm on data matrix X, where each row of X
         %is a single example
         
@@ -57,6 +67,7 @@ classdef kmeans_c < handle
             centroids = initial_centroids;
             previous_centroids = centroids;
             idx = zeros(m, 1);
+            J_history = zeros(max_iters,1);
 
             % Run K-Means
             for i=1:max_iters
@@ -66,8 +77,10 @@ classdef kmeans_c < handle
                 
                 % Given the memberships, compute new centroids
                 centroids = obj.compute_centroids(x,idx,k);
+                
+                J_history(i) = obj.cost(x,idx,centroids);
             end
-        
+            
         end
 
     end

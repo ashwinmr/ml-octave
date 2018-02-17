@@ -13,4 +13,6 @@ idx = kmeans.find_closest(X,initial_centroids);
 
 centroids = kmeans.compute_centroids(X,idx,k);
 
-centroids = kmeans.learn(X,k);
+[centroids,idx,J_history] = kmeans.learn(X,k);
+
+plot(J_history);
