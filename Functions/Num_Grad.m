@@ -1,5 +1,5 @@
 function numgrad = Num_Grad(J,theta,epsilon)
-% Computes the numarical gradient given a theta vector and a cost function pointer
+% Computes the numerical gradient given a theta vector and a cost function pointer
 % which uses theta as the only input
 % J(theta) should give the cost at theta              
 
